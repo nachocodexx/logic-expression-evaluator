@@ -2,11 +2,24 @@ package io.codex.utils
 
 //import Application.logicalVariables
 ///
+import io.codex.encoders.JsonSupport.TruthColumn
+
 import scala.annotation.tailrec
 import scala.collection.immutable.List
 
 object Utils {
 
+//  def
+  def toTruthColumns(xss:List[(String,List[Int])]): List[TruthColumn] = xss.map {
+    case (str, value) => TruthColumn(str,value)
+  }
+  def zipVariableWithValues(variables:List[Char],values:List[List[Int]]): List[(String, List[Int])] = variables.zipWithIndex.map {
+    case (c, i) => (c.toString,values.map(x=>x(i)))
+  }
+  def booleanToString(x:Boolean): String = if(x) "Yes" else "No"
+//  def zipVariablesAndTruthValues(variables:List[Char],values:List[Int])= {
+//    def loop()
+//  }
   def pad(xs:List[Int], size:Int): List[Int] = {
     val xLen= xs.length
     if(xLen == size)  xs
