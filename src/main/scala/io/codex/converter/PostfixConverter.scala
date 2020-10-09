@@ -24,8 +24,10 @@ object PostfixConverter {
     }
     def getPrecedence(operator:Char): Int = operator match {
       case '+' => 0
-      case '*' => 1
-      case '~' => 2
+//      case '>' => 1
+      case '→' | '↔' => 1
+      case '*' => 2
+      case '~' => 3
       case _ => -1
     }
 

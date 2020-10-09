@@ -9,7 +9,57 @@ import scala.collection.immutable.List
 
 object Utils {
 
-//  def
+//  def conditionalWith
+  def replaceConditional(xs:List[Char],conditionals:List[Int],leftParenthesis:List[Int],rightParenthesis:List[Int]) ={
+    conditionals.map{
+      i=>
+        val value = xs(i)
+        val next= xs(i+1)
+        val prev = xs(i-1)
+//        val prevList = xs.slice()
+//        if( prev != '(' && next != ')')
+    }
+  }
+
+  def characterWithIndexes(xs:List[Char],fn:Char=>Boolean): List[Int] =
+    xs
+      .zipWithIndex
+      .filter(x=>fn(x._1))
+      .map(_._2)
+
+  def leftParenthesisWithIndexes(xs:List[Char]) = characterWithIndexes(xs,_=='(')
+  def rightParenthesisWithIndexes(xs:List[Char])= characterWithIndexes(xs,_==')')
+  def conditionalWithIndexes(xs:List[Char])= characterWithIndexes(xs,_=='>' ).filter {
+    x=> xs(x-1) != '<'
+  }
+//
+  @tailrec
+  def biconditionalWithIndexes(n:Int=0,xs:List[Char], result:List[List[Int]]=Nil):List[List[Int]] = {
+      val len = xs.length
+      def find(n:Int):String = {
+        val value= xs(n)
+        if(len == n) return ""
+        if(value =='<') s"$n-${find(n+1)}"
+        else if(value == '>') n.toString
+        else find(n+1)
+      }
+    if(len < 4) result
+    else {
+      val biMatch = find(0).split('-').map(_.toInt).toList
+      if(biMatch.length <1) result
+      def correctIndexes(x:List[Int]) = if(n>0) x.map(_+result(n-1).head) else x
+//      println(result.map(_.last).sum,result,n)
+      biconditionalWithIndexes(
+        0,
+        xs.slice(biMatch.last+1,xs.length),
+        result:+biMatch.map(_+n))
+    }
+  }
+
+//  def parenthesisWithIndexes(xs:List[Char]): List[(Int, Char)] =characterWithIndexes(xs, x=> x==')' || x=='(')
+//  def conditionalWithIndexes(xs:List[Char]): List[(Int, Char)] =characterWithIndexes(xs, x=> x=='>')
+//  def biconditionalWithIndexes(xs:List[Char])=characterWithIndexes(xs,x=>x=='<>')
+
   def toTruthColumns(xss:List[(String,List[Int])]): List[TruthColumn] = xss.map {
     case (str, value) => TruthColumn(str,value)
   }

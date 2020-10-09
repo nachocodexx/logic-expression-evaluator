@@ -17,11 +17,28 @@ object PostfixCalculator {
   def operand (num:Int):CalcState[Int]  = State[List[Int],Int] { stack=>
     ( num :: stack , num)
   }
+  def conditional():State[List[Int],Int]= State[List[Int],Int] {
+    case a :: b :: tail =>
+      val result = if(b==1 && a==0 ) 0 else 1
+//      println(s"P: $a -> Q: $b = $result")
+//      println(a::b::tail)
+      (result::tail,result)
+  }
 
+
+
+  def biconditional():CalcState[Int] = State[List[Int],Int] {
+    case a::b::tail=>
+      val result = if((a==1 && b==1) || (a==0 && b==0)) 1 else 0 
+      (result::tail,result)
+  }
   def evalOne(sym:String):CalcState[Int] = sym match {
     case "+" =>operator((x,y)=>if(x==0) y else x)
     case "*" =>operator(_*_)
     case "~" => unaryOperator()
+    case ">" => conditional()
+    case "→" => conditional()
+    case "↔" => biconditional()
     case _ => operand(sym.toInt)
   }
   def evalInput(expression:String): CalcState[Int] = {
