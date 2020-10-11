@@ -23,3 +23,4 @@ libraryDependencies ++= Seq(
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
 dockerExposedPorts ++= Seq(8080,8080)
+packageName := "nachocode/cinvestav-logicevaluator"
