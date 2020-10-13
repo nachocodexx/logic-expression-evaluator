@@ -5,5 +5,7 @@ object JsonSupport {
                                     data:List[TruthColumn],
                                     isTautology:String,
                                     isContradiction:String,
-                                    isContingency:String, isSatisfiable:String)
+                                    isContingency:String, isSatisfiable:String,expressionType:String)
+
+ case class OnlyNumbersResponse(expression:String,result:Int,expressionType:String)
 }

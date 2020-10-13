@@ -7,7 +7,7 @@ object PostfixConverter {
     //  def hasConditional(xs:List[Char]): Nothing = ???
     //  def hasBiconditional(xs:List[Char]): Nothing = ???
 
-    def isVariable(x:Char):Boolean = (!isOperator(x)  && !isParenthesis(x))
+    def isVariable(x:Char):Boolean = (!isOperator(x)  && !isParenthesis(x)) && !x.isDigit
     def isOperator(x:Char): Boolean = getPrecedence(x) != -1
     def isRightParenthesis(x:Char): Boolean =x match {
       case ')' => true

@@ -3,7 +3,7 @@ package io.codex.evaluator
 import io.codex.calculator.PostfixCalculator.evalInput
 import io.codex.converter.PostfixConverter.{infixToPostfix, isVariable}
 import io.codex.encoders.JsonSupport
-import io.codex.utils.Utils.{booleanToString, pad, substituteValuesInExpression, toBinary, toTruthColumns, zipVariableWithValues}
+import io.codex.utils.Utils.{booleanToString, filteredBinaryNumbers, generateBinaryNumbers, processMixedInput, substituteValuesInExpression, toTruthColumns, zipVariableWithValues}
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
 
@@ -17,8 +17,17 @@ object LogicExpressionEvaluator {
   def appendCloseParenthesis(value:List[Char]): List[Char] = value :+ ')'
   def parseInput(value:String): List[Char] = (getExpressionList _ andThen appendCloseParenthesis)(value)
   def getVariables(xs:List[Char],f:Char=>Boolean): List[Char] = xs.filter(f).distinct.sorted
+  def getIndependentVariables(xs:List[Char]): List[Char] = xs.filter(!isVariable(_)).filter(_.isDigit).map {
+    x=> if(x=='1') 'T'else 'F'
+  }.sorted.reverse
   def getVariableLength(xs:List[Char]): Int =xs.length
   def getTotalRows(n:Int): Int = pow(2,n).toInt
+
+  def hasTrueAndFalse(xs:List[Int]): Boolean = xs.contains(1) && xs.contains(0)
+  def hasOnlyNumbers(xs:List[Char]): Boolean = getVariables(xs, isVariable).count(!_.isDigit) ==0
+  def isMixed(xs:List[Char]): Boolean = getVariables(xs, !isVariable(_)).exists(_.isDigit)
+  def onlyFalse(xs:List[Char]): Boolean =xs.head == 'F'
+  def onlyTrue(xs:List[Char]): Boolean =xs.head == 'T'
 
   def isTautology(xs:List[Int]): Boolean = !xs.exists(_ != 1)
   def isTautologyStr: List[Int] => String = isTautology _ andThen booleanToString
@@ -30,6 +39,35 @@ object LogicExpressionEvaluator {
   def isSatisfiableStr: List[Int] => String = isSatisfiable _ andThen booleanToString
 
 //  def on
+  def evaluateBinaryExpression(input:String): Int = {
+    val testExpression = parseInput(input)
+    val postfixExpression = infixToPostfix(testExpression,'('::Nil)
+    val response = evalInput(postfixExpression).runA(Nil).value
+    response
+  }
+
+  def evaluateMixedExpression(input:String): (List[Int], List[JsonSupport.TruthColumn]) = {
+    val  processedInput = processMixedInput(input)
+    val testExpression = parseInput(input)
+    val processedTestExpression = parseInput(processedInput)
+    val variables= getVariables(processedTestExpression,isVariable)
+    val onlyLetterVariables = getVariables(testExpression,isVariable)
+    val logicalVariablesLength=variables.length
+    val bits = variables.filter(x=>x=='F' || x=='T')
+    val unfilteredBinaryNumbers = generateBinaryNumbers(logicalVariablesLength)
+    val binaryNumbers = filteredBinaryNumbers(bits,unfilteredBinaryNumbers )
+    val postfixExpression = infixToPostfix(testExpression,'('::Nil)
+//
+    val getIndependentVariablesResult=getIndependentVariables(testExpression)
+//
+    val allPossibleExpressions = substituteValuesInExpression(postfixExpression,logicalVariablesLength,variables, binaryNumbers)
+    val response = allPossibleExpressions.map(evalInput).map(_.runA(Nil).value)
+    val columns = zipVariableWithValues(onlyLetterVariables:++getIndependentVariablesResult,binaryNumbers) :+ (input,response)
+    println(columns)
+    val data= toTruthColumns(columns)
+
+    (response,data)
+  }
 
   def evaluate(input:String): (List[Int], List[JsonSupport.TruthColumn]) ={
     // Parse the logical statement to List[Char]
@@ -38,14 +76,8 @@ object LogicExpressionEvaluator {
     val logicalVariables = getVariables(testExpression,isVariable)
     //  Getting total of the variables
     val logicalVariablesLength = getVariableLength(logicalVariables)
-    //  Total of rows using this formula (2^n -1)
-    val totalOfRows  = getTotalRows(logicalVariablesLength)
-    // Range from 0 to (2^n - 1)
-    val maximum = 0 until totalOfRows
-    // Getting the binary numbers from 0 to (2^n - 1)
-    val binaryNumbers  = maximum.toList.map(toBinary(_)).map(pad(_,logicalVariablesLength))
-
-//    println(test)
+//
+    val binaryNumbers = generateBinaryNumbers(logicalVariablesLength)
     //  Infix to postfix using Shunting-yard algorithm
     val postfixExpression = infixToPostfix(testExpression,'('::Nil)
     // Substitute the binary numbers in the postfix expression
@@ -56,30 +88,7 @@ object LogicExpressionEvaluator {
     //
     val columns = zipVariableWithValues(logicalVariables,binaryNumbers) :+ (input,response)
     val data= toTruthColumns(columns)
-
-//    response
-//    val isTautologyStr= (isTautology _ an
-//    val isContradictionStr= (isContradiction _ andThen booleanToString)(response)
-//    val isContingencyStr= (isContingency _ andThen booleanToString)(response)
-//    val isSatisfiableStr= (isSatisfiable _ andThen booleanToString)(response)
-
-//    logger.info(s"Variables: ${logicalVariables.mkString(",")}")
-//    println(s"Infix expression: $input")
-//    println(s"Postfix expression: $postfixExpression")
-//    println(s"All possible expressions: ${allPossibleExpressions.mkString(", ")}")
-//    println(s"Is it a tautology: ${isTautologyStr(response)}")
-//    println(s"Is it a contradiction: $isContradictionStr")
-//    println(s"Is it a contingency: $isContingencyStr")
-//    println(s"Is it a satisfiableStr: $isSatisfiableStr")
-//    println(s"Data: $data")
-
-//    println(s"Result: ${response.mkString(", ")}")
     (response,data)
-
-
-//    LogicExpressionResponse(input,data,isTautology = isTautologyStr(response),isContradiction=isContradictionStr,
-//      isContingency
-//      = isContingencyStr, isSatisfiable = isSatisfiableStr)
 
   }
 

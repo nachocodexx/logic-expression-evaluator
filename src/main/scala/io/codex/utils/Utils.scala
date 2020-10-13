@@ -3,23 +3,14 @@ package io.codex.utils
 //import Application.logicalVariables
 ///
 import io.codex.encoders.JsonSupport.TruthColumn
+import io.codex.evaluator.LogicExpressionEvaluator.{getTotalRows, onlyTrue}
 
 import scala.annotation.tailrec
 import scala.collection.immutable.List
 
 object Utils {
 
-//  def conditionalWith
-  def replaceConditional(xs:List[Char],conditionals:List[Int],leftParenthesis:List[Int],rightParenthesis:List[Int]) ={
-    conditionals.map{
-      i=>
-        val value = xs(i)
-        val next= xs(i+1)
-        val prev = xs(i-1)
-//        val prevList = xs.slice()
-//        if( prev != '(' && next != ')')
-    }
-  }
+
 
   def characterWithIndexes(xs:List[Char],fn:Char=>Boolean): List[Int] =
     xs
@@ -27,38 +18,6 @@ object Utils {
       .filter(x=>fn(x._1))
       .map(_._2)
 
-  def leftParenthesisWithIndexes(xs:List[Char]) = characterWithIndexes(xs,_=='(')
-  def rightParenthesisWithIndexes(xs:List[Char])= characterWithIndexes(xs,_==')')
-  def conditionalWithIndexes(xs:List[Char])= characterWithIndexes(xs,_=='>' ).filter {
-    x=> xs(x-1) != '<'
-  }
-//
-  @tailrec
-  def biconditionalWithIndexes(n:Int=0,xs:List[Char], result:List[List[Int]]=Nil):List[List[Int]] = {
-      val len = xs.length
-      def find(n:Int):String = {
-        val value= xs(n)
-        if(len == n) return ""
-        if(value =='<') s"$n-${find(n+1)}"
-        else if(value == '>') n.toString
-        else find(n+1)
-      }
-    if(len < 4) result
-    else {
-      val biMatch = find(0).split('-').map(_.toInt).toList
-      if(biMatch.length <1) result
-      def correctIndexes(x:List[Int]) = if(n>0) x.map(_+result(n-1).head) else x
-//      println(result.map(_.last).sum,result,n)
-      biconditionalWithIndexes(
-        0,
-        xs.slice(biMatch.last+1,xs.length),
-        result:+biMatch.map(_+n))
-    }
-  }
-
-//  def parenthesisWithIndexes(xs:List[Char]): List[(Int, Char)] =characterWithIndexes(xs, x=> x==')' || x=='(')
-//  def conditionalWithIndexes(xs:List[Char]): List[(Int, Char)] =characterWithIndexes(xs, x=> x=='>')
-//  def biconditionalWithIndexes(xs:List[Char])=characterWithIndexes(xs,x=>x=='<>')
 
   def toTruthColumns(xss:List[(String,List[Int])]): List[TruthColumn] = xss.map {
     case (str, value) => TruthColumn(str,value)
@@ -67,9 +26,36 @@ object Utils {
     case (c, i) => (c.toString,values.map(x=>x(i)))
   }
   def booleanToString(x:Boolean): String = if(x) "Yes" else "No"
-//  def zipVariablesAndTruthValues(variables:List[Char],values:List[Int])= {
-//    def loop()
-//  }
+
+  def generateBinaryNumbers(n:Int): List[List[Int]] ={
+    //  Total of rows using this formula (2^n -1)
+    val totalOfRows  = getTotalRows(n)
+    // Range from 0 to (2^n - 1)
+    val maximum = 0 until totalOfRows
+    // Getting the binary numbers from 0 to (2^n - 1)
+    val binaryNumbers  = maximum.toList.map(toBinary(_)).map(pad(_,n))
+    binaryNumbers
+  }
+  def filteredBinaryNumbers(bits:List[Char], binaryNumbers:List[List[Int]]): List[List[Int]] = {
+    if(bits.length>1) binaryNumbers.filter(filterMixed)
+    else
+      if(onlyTrue(bits)) binaryNumbers.filter(filterLastTrue)
+      else binaryNumbers.filter(filterLastFalse)
+  }
+ def filterLastFalse: List[Int]=>Boolean = {
+   case init :+x => x==0
+ }
+  def filterLastTrue:List[Int]=>Boolean ={
+    case init:+x=>x==1
+  }
+  def filterMixed:List[Int]=>Boolean = {
+    case init:+x:+y=>x==1 && y==0
+  }
+
+  def replaceNumberOneForTrue(input:String): String = input.replaceAll("1","T")
+  def replaceNumberZeroForFalse(input:String): String = input.replaceAll("0","F")
+  def processMixedInput(input:String): String = (replaceNumberOneForTrue _ andThen replaceNumberZeroForFalse)(input)
+
   def pad(xs:List[Int], size:Int): List[Int] = {
     val xLen= xs.length
     if(xLen == size)  xs

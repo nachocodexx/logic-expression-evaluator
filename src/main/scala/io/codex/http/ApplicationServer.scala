@@ -5,7 +5,7 @@ import cats.effect.IO
 import org.http4s.implicits._
 import org.http4s.dsl.io._
 import org.http4s.{HttpRoutes, Request, Response}
-import io.codex.evaluator.LogicExpressionEvaluator.{evaluate, isContingencyStr, isContradictionStr, isSatisfiableStr, isTautologyStr}
+import io.codex.evaluator.LogicExpressionEvaluator.{evaluate, evaluateBinaryExpression, evaluateMixedExpression, hasOnlyNumbers, isContingencyStr, isContradictionStr, isMixed, isSatisfiableStr, isTautologyStr}
 import io.circe.syntax._
 import org.http4s.circe._
 
@@ -33,18 +33,32 @@ object ApplicationServer {
   def apply(): Kleisli[IO, Request[IO], Response[IO]] =
    CORS(HttpRoutes.of[IO] {
       case GET -> Root / "logic" / logicStatement =>
-        val (result,data) = evaluate(logicStatement)
+        val hasOnlyNumberResult = hasOnlyNumbers(logicStatement.toList)
+        val isMixedResult = isMixed(logicStatement.toList)
+        println(logicStatement,hasOnlyNumberResult)
+        if(hasOnlyNumberResult){
+          val result= evaluateBinaryExpression(logicStatement)
+          val response = OnlyNumbersResponse(logicStatement,result,"only-numbers")
+          Ok(response.asJson)
+        }
+        else if(isMixedResult){
+          val (result, data)= evaluateMixedExpression(logicStatement)
+          val response = LogicExpressionResponse(logicStatement,data,isTautologyStr(result),isContradictionStr
+          (result),isContingencyStr(result),isSatisfiableStr(result),"mixed").asJson
+          Ok(response)
+        }
+        else {
 
-        Ok(LogicExpressionResponse(
-          logicStatement,
-          data,
-          isTautologyStr(result),
-          isContradictionStr(result),
-          isContingencyStr(result),
-          isSatisfiableStr(result)
-        ).asJson)
-//      case POST -> Root /"process" =>
-//        Ok("HOLA POST")
+          val (result, data) = evaluate(logicStatement)
+
+          val response = LogicExpressionResponse(logicStatement, data, isTautologyStr(result), isContradictionStr(result),
+            isContingencyStr(result), isSatisfiableStr(result), "normal").asJson
+
+
+          Ok(response)
+        }
+
+
     }).orNotFound
 
 }
