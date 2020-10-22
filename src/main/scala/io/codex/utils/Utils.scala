@@ -1,7 +1,5 @@
 package io.codex.utils
-
-//import Application.logicalVariables
-///
+import cats.effect._
 import io.codex.encoders.JsonSupport.TruthColumn
 import io.codex.evaluator.LogicExpressionEvaluator.{getTotalRows, onlyTrue}
 
@@ -10,7 +8,15 @@ import scala.collection.immutable.List
 
 object Utils {
 
+  def removeNonAlphabeticCharacters(x:String): String = x.replaceAll("""[^A-Za-z]"""," ")
+  def extractWordsFromString(x:String): IO[List[String]] = IO(removeNonAlphabeticCharacters(x).split(" ").toList.map(_
+    .toUpperCase).map(_.trim).filter(_.length>0))
 
+  def nCr(n:Int,r:Int): Int = (factorial(n))/(factorial(r)*factorial(n-r))
+  def factorial(n:Int):Int  ={
+    if(n==0 || n==1) 1
+    else n*factorial(n-1)
+  }
 
   def characterWithIndexes(xs:List[Char],fn:Char=>Boolean): List[Int] =
     xs

@@ -58,7 +58,7 @@ object LogicExpressionEvaluator {
     val binaryNumbers = filteredBinaryNumbers(bits,unfilteredBinaryNumbers )
     val postfixExpression = infixToPostfix(testExpression,'('::Nil)
 //
-    val getIndependentVariablesResult=getIndependentVariables(testExpression)
+    val getIndependentVariablesResult=getIndependentVariables(processedTestExpression)
 //
     val allPossibleExpressions = substituteValuesInExpression(postfixExpression,logicalVariablesLength,variables, binaryNumbers)
     val response = allPossibleExpressions.map(evalInput).map(_.runA(Nil).value)
@@ -76,7 +76,7 @@ object LogicExpressionEvaluator {
     val logicalVariables = getVariables(testExpression,isVariable)
     //  Getting total of the variables
     val logicalVariablesLength = getVariableLength(logicalVariables)
-//
+    //
     val binaryNumbers = generateBinaryNumbers(logicalVariablesLength)
     //  Infix to postfix using Shunting-yard algorithm
     val postfixExpression = infixToPostfix(testExpression,'('::Nil)

@@ -18,7 +18,9 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic" % "0.13.0",
   // Optional for string interpolation to JSON model
   "io.circe" %% "circe-literal" % "0.13.0",
-  "org.slf4j" % "slf4j-simple" % "1.6.4"
+  "org.slf4j" % "slf4j-simple" % "1.6.4",
+  "org.scala-lang" % "scala-reflect" % "2.13.3",
+  "io.chrisdavenport" %% "log4cats-slf4j"   % "1.1.1",  // Direct Slf4j Support - Recommended
 )
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)

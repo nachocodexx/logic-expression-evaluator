@@ -63,6 +63,11 @@ class PostfixTest extends  AnyFunSuite {
     val answer = 1::0::0::1::1::0::1::0::1::0::1::0::1::0::1::0::Nil
     assert(result._1==answer)
   }
+  test("Mixed expression: (A+1)+1+1"){
+    val input = "(A+1)+1+1"
+    val result = evaluateMixedExpression(input)
+    assert(result._1 == 1::1::Nil)
+  }
 
 
 }
