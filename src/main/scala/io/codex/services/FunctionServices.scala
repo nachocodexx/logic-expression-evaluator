@@ -29,7 +29,7 @@ object FunctionServices {
   def apply()(implicit timer:Timer[IO]):HttpRoutes[IO] = HttpRoutes.of {
     case GET -> Root / "stream" => Ok(test())
 
-    case req @ POST -> Root / "option1" => for {
+    case req @ POST -> Root / "option0" => for {
       data <- req.as[SetsData]
       x <- extractWordsFromString(data.A).map(Setx(_))
       y <- extractWordsFromString(data.B).map(Setx(_))
@@ -41,7 +41,7 @@ object FunctionServices {
       response <- Ok(json)
     } yield response
 
-    case req @ POST -> Root / "option2"=> for {
+    case req @ POST -> Root / "option1"=> for {
       data <- req.as[SetsData]
       x <- extractWordsFromString(data.A).map(Setx(_))
       y <- extractWordsFromString(data.B).map(Setx(_))
@@ -53,7 +53,7 @@ object FunctionServices {
       response <- Ok(data)
     } yield response
 
-    case req @ POST -> Root / "option3" => for {
+    case req @ POST -> Root / "option2" => for {
       data <- req.as[SetsData]
       x <- extractWordsFromString(data.A).map(Setx(_))
       y <- extractWordsFromString(data.B).map(Setx(_))
@@ -64,7 +64,7 @@ object FunctionServices {
       data <- IO(FunctionResponse(data = processedRelations).asJson)
       response <- Ok(data)
     } yield response
-    case req @ POST -> Root / "option4" => for {
+    case req @ POST -> Root / "option3" => for {
       data <- req.as[SetsData]
       x <- extractWordsFromString(data.A).map(Setx(_))
       y <- extractWordsFromString(data.B).map(Setx(_))
@@ -75,7 +75,7 @@ object FunctionServices {
       data <- IO(FunctionResponse(data = processedRelations).asJson)
       response <- Ok(data)
     } yield response
-    case req @ POST -> Root / "option5" => for {
+    case req @ POST -> Root / "option4" => for {
       data <- req.as[SetsData]
       x <- extractWordsFromString(data.A).map(Setx(_))
       y <- extractWordsFromString(data.B).map(Setx(_))
@@ -87,16 +87,16 @@ object FunctionServices {
       response <- Ok(data)
     } yield response
 
-    case req @ POST -> Root / "option6" => for {
+    case req @ POST -> Root / "option5" => for {
       data <- req.as[OrderedPairData]
       x <- extractWordsFromString(data.A)
       xTuple <- IO(listToTuple(x)).map(_.getOrElse(Nil))
       domain <-Functions.getDomain(xTuple)
       codomain <-Functions.getCodomain(xTuple)
       isRelation <- IO((domain & codomain)).map(_.cardinality).map(_==0).map(booleanToString)
-      _<-Logger[IO].info(isRelation)
-      _<-Logger[IO].info(x.toString)
-      _<-Logger[IO].info(xTuple.toString)
+//      _<-Logger[IO].info(isRelation)
+//      _<-Logger[IO].info(x.toString)
+//      _<-Logger[IO].info(xTuple.toString)
       data <- IO(booleanTupleToString(Functions.getCartesianProductSubsetInfo(Setx(xTuple),domain,codomain))).map{
         x=> if(isRelation=="No") ("No","No","No","No") else x
       }
