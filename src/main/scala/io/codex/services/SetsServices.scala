@@ -27,11 +27,21 @@ object SetsServices {
       data <- req.as[SetsData]
       x <- extractWordsFromString(data.A).map(Setx(_))
       y <- extractWordsFromString(data.B).map(Setx(_))
+      cartersianProductAB<-IO(x~*y.members).map(x=>x.map{
+        case (x, y) => s"($x,$y)"
+      })
+      cartersianProductBA<-IO(y~*x.members).map(x=>x.map{
+        case (x, y) => s"($x,$y)"
+      })
+      powerSetA <- IO(Setx.powerset(x.members).members.filter(_.cardinality>0).map(_.members).map(_.mkString(",")).map
+      (x=>s"{$x}") )
+      powerSetB <- IO(Setx.powerset(x.members).members.filter(_.cardinality>0).map(_.members).map(_.mkString(",")).map
+      (x=>s"{$x}") )
+
       responseJson <- IO(SetsOperationsResponse(
         members = Members(x.members,y.members),
         cardinalities = Cardinalities(x.cardinality,y.cardinality),
-        powerSets = PowerSets(Setx.powerset(x.members).members.map(_.members),Setx.powerset(y.members).members.map(_
-          .members)),
+        powerSets = PowerSets(powerSetA ,powerSetB),
         comparison = booleanToString(x==y),
         subsets = Subsets( booleanToString(x.subsetOf(y)),booleanToString(y.subsetOf(y))),
         difference = Difference((x-y).members,(y-x).members),
@@ -39,7 +49,7 @@ object SetsServices {
         symmetricDifference = SymmetricDifference((x-&y).members,(y-&x).members),
         union = (x|y).members,
         intersection = Intersection((x&y).members,booleanToString(Setx.areDisjoint(x,y))),
-        cartersianProduct = CartersianProduct( x~*y.members,y~*x.members)
+        cartersianProduct = CartersianProduct( cartersianProductAB,cartersianProductBA)
 
       ))
       response <-Ok(responseJson.asJson)

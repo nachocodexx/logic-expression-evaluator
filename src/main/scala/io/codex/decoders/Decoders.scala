@@ -8,6 +8,8 @@ object Decoders {
 
   case class SetsData(A:String,B:String)
   implicit val setsDataDecoder: EntityDecoder[IO, SetsData] = jsonOf[IO,SetsData]
+  case class OrderedPairData(A:String)
+  implicit val orderedPairDataDecoder: EntityDecoder[IO, OrderedPairData] = jsonOf[IO,OrderedPairData]
 
 
 }

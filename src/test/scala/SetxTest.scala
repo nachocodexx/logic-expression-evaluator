@@ -37,7 +37,8 @@ class SetxTest extends  AnyFunSuite{
   test("Power set of A"){
     val A = Setx(1::2::3::Nil)
     val res = Setx.powerset(A.members)
-    println(res)
+    val text = res.members.map(_.members).map(_.mkString(",")).map(x=>s"{$x}")
+    println(text)
     assert(true)
   }
 //  X
@@ -48,7 +49,8 @@ class SetxTest extends  AnyFunSuite{
   test("Cartesian product: A~*B"){
     val A = Setx(1::2::Nil)
     val res = A ~* A.members
-    println(res)
+    val text = res.mkString(",")
+    println(text)
     assert(true)
   }
   test("Symmetric difference: A-&"){
@@ -60,7 +62,7 @@ class SetxTest extends  AnyFunSuite{
   test("Proper subset"){
     val A = Setx(1::2::Nil)
     val B = Setx(1::2::3::Nil)
-    val res =  B.isProperSubsetOf(A)
+    val res =  A.isProperSubsetOf(B)
     val properSubset = A.getEqualElements(B)
     assert(res)
   }

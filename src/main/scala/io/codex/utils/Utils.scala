@@ -5,10 +5,25 @@ import io.codex.evaluator.LogicExpressionEvaluator.{getTotalRows, onlyTrue}
 
 import scala.annotation.tailrec
 import scala.collection.immutable.List
+import scala.collection.mutable.ArrayBuffer
 
 object Utils {
 
-  def removeNonAlphabeticCharacters(x:String): String = x.replaceAll("""[^A-Za-z]"""," ")
+  def listToTuple(xs:List[String]):Option[List[(String,String)]] = {
+    if(xs.length%2 !=0) return  None
+    val state:ArrayBuffer[(String,String)]=ArrayBuffer.empty
+    @tailrec
+    def makeTuple(xss:List[String], n:Int=0):Unit = {
+      if(xss.isEmpty) return
+      if(n%2 != 0) state.addOne(xs(n-1),xs(n))
+
+      makeTuple(xss.tail,n+1)
+    }
+    makeTuple(xs)
+    Some(state.toList)
+  }
+
+  def removeNonAlphabeticCharacters(x:String): String = x.replaceAll("""[^A-Za-z0-9]"""," ")
   def extractWordsFromString(x:String): IO[List[String]] = IO(removeNonAlphabeticCharacters(x).split(" ").toList.map(_
     .toUpperCase).map(_.trim).filter(_.length>0))
 
@@ -32,6 +47,11 @@ object Utils {
     case (c, i) => (c.toString,values.map(x=>x(i)))
   }
   def booleanToString(x:Boolean): String = if(x) "Yes" else "No"
+  def booleanTupleToString(x:(Boolean,Boolean,Boolean,Boolean)): (String, String, String, String) =
+    (booleanToString(x._1),
+      booleanToString(x._2),
+    booleanToString(x._3),
+        booleanToString(x._4))
 
   def generateBinaryNumbers(n:Int): List[List[Int]] ={
     //  Total of rows using this formula (2^n -1)

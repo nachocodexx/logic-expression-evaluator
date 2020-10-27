@@ -11,7 +11,7 @@ case class Setx[+A](members:List[A]) {
   def contains[B >: A](x: B): Boolean = members.contains(x)
   def subsetOf[B >: A](xs: Setx[B]): Boolean = xs.count(members.contains(_)) == members.length
   def getEqualElements[B>:A](ys:Setx[B]): List[B] = ys.members.filter(this.contains(_))
-  def isProperSubsetOf[B>:A](ys:Setx[B]): Boolean =this.getEqualElements(ys).nonEmpty
+  def isProperSubsetOf[B>:A](ys:Setx[B]): Boolean = this.subsetOf(ys) && (ys-this).cardinality>0
   def count(f: A => Boolean): Int = members.count(f)
   def isEmpty: Boolean = members.isEmpty
   def cardinality: Int = members.length
@@ -60,7 +60,7 @@ case class Setx[+A](members:List[A]) {
 
 //case  object EmptySetx extends Setx[Nothing]
 object Setx{
-  def apply[A](members: List[A]): Setx[A] = new Setx(members)
+  def apply[A](members: List[A]): Setx[A] = new Setx(members.distinct)
   def of[A](x:A)=new Setx[A](x::Nil)
   def empty[A]: Setx[A] = Setx[A](Nil)
   def singleton[A](x:A): Setx[A] =Setx.of(x)
