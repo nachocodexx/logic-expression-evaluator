@@ -48,22 +48,34 @@ object LogicExpressionEvaluator {
 
   def evaluateMixedExpression(input:String): (List[Int], List[JsonSupport.TruthColumn]) = {
     val  processedInput = processMixedInput(input)
+
     val testExpression = parseInput(input)
     val processedTestExpression = parseInput(processedInput)
+
     val variables= getVariables(processedTestExpression,isVariable)
+
     val onlyLetterVariables = getVariables(testExpression,isVariable)
+
     val logicalVariablesLength=variables.length
     val bits = variables.filter(x=>x=='F' || x=='T')
+
     val unfilteredBinaryNumbers = generateBinaryNumbers(logicalVariablesLength)
     val binaryNumbers = filteredBinaryNumbers(bits,unfilteredBinaryNumbers )
-    val postfixExpression = infixToPostfix(testExpression,'('::Nil)
+//    val postfixExpression = infixToPostfix(testExpression,'('::Nil)
+    val postfixExpression = infixToPostfix(processedTestExpression,'('::Nil)
+
 //
-    val getIndependentVariablesResult=getIndependentVariables(processedTestExpression)
+//    val getIndependentVariablesResult=getIndependentVariables(processedTestExpression)
+    val getIndependentVariablesResult=getIndependentVariables(testExpression).distinct
 //
     val allPossibleExpressions = substituteValuesInExpression(postfixExpression,logicalVariablesLength,variables, binaryNumbers)
+
     val response = allPossibleExpressions.map(evalInput).map(_.runA(Nil).value)
+
     val columns = zipVariableWithValues(onlyLetterVariables:++getIndependentVariablesResult,binaryNumbers) :+ (input,response)
+
     println(columns)
+
     val data= toTruthColumns(columns)
 
     (response,data)

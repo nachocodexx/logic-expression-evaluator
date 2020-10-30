@@ -4,9 +4,10 @@ import io.codex.converter.PostfixConverter._
 import io.codex.utils.Utils._
 class PostfixTest extends  AnyFunSuite {
   test("Process mixed expression"){
-    val input = "(A+1)+0"
+    val input = "(A→1)+0"
     val processedExpression = processMixedInput(input)
-    assert(processedExpression=="(A+T)+F")
+    println(processedExpression)
+    assert(processedExpression=="(A→T)+F")
   }
   test("Logic expression that contains only binary digits"){
     val input ="(1+0)*0"
@@ -64,7 +65,7 @@ class PostfixTest extends  AnyFunSuite {
     assert(result._1==answer)
   }
   test("Mixed expression: (A+1)+1+1"){
-    val input = "(A+1)+1+1"
+    val input = "(0→A)"
     val result = evaluateMixedExpression(input)
     assert(result._1 == 1::1::Nil)
   }

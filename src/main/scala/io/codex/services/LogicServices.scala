@@ -21,6 +21,7 @@ object LogicServices {
       }
       else if (isMixedResult) {
         val (result, data) = evaluateMixedExpression(logicStatement)
+        println(result)
         val response = LogicExpressionResponse(logicStatement, data, isTautologyStr(result), isContradictionStr
         (result), isContingencyStr(result), isSatisfiableStr(result), "mixed").asJson
         Ok(response)

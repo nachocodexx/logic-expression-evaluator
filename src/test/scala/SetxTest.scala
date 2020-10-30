@@ -47,10 +47,15 @@ class SetxTest extends  AnyFunSuite{
     assert(true)
   }
   test("Cartesian product: A~*B"){
-    val A = Setx(1::2::Nil)
+    val values = List.fill(5)(s"GOLA-${math.random()}")
+    val A = Setx(values)
     val res = A ~* A.members
-    val text = res.mkString(",")
-    println(text)
+    val res2 = Setx.powerset(res)
+    println(s"|A| =${values.length}")
+    println(s"|AxB| = ${res.length}")
+    println(s"|Ps(|AxB|)| = ${res2.cardinality}")
+//    val text = res.mkString(",")
+//    println(text)
     assert(true)
   }
   test("Symmetric difference: A-&"){

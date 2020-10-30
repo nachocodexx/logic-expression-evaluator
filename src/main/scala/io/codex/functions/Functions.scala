@@ -34,7 +34,7 @@ object Functions {
        val codomainStateLen = codomainState.length
        val codomainStateLenTemp = (codomainState.distinct).length
        val isFunction = domainStateLen == domain.cardinality
-       val isInjective =  isFunction && codomain.cardinality == codomainStateLen
+       val isInjective =  isFunction && domain.cardinality == codomainStateLenTemp
        val isSurjective = isFunction && (codomain.cardinality == codomainStateLenTemp)
        return (isFunction,
          isInjective,

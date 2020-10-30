@@ -16,6 +16,7 @@ import io.codex.functions.Functions
 import io.circe.syntax._
 import io.circe.generic.auto._
 import io.codex.decoders.Decoders._
+import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -23,23 +24,32 @@ import scala.language.postfixOps
 object FunctionServices {
   implicit def usageLogger[F[_]:Sync]: SelfAwareStructuredLogger[F] = Slf4jLogger.unsafeCreate[F]
 
-  def test()(implicit timer: Timer[IO]): Stream[IO, String] =
-    Stream.awakeEvery[IO](1 seconds).map(_.toString)
+  def test()(implicit timer: Timer[IO]) = {
+    val data = List.fill(100000)(FunctionItemResponse(Nil,"Yes","Yes","Yes","Yes","Yes"))
+    Stream.emits(data).evalMap(x=>IO(x))
+  }
 
-  def apply()(implicit timer:Timer[IO]):HttpRoutes[IO] = HttpRoutes.of {
+  //      Stream.awakeEvery[IO](1 seconds).map(_.toString)
+
+  def apply()(implicit timer:Timer[IO], cs:ContextShift[IO]):HttpRoutes[IO] = HttpRoutes.of {
     case GET -> Root / "stream" => Ok(test())
 
-    case req @ POST -> Root / "option0" => for {
-      data <- req.as[SetsData]
-      x <- extractWordsFromString(data.A).map(Setx(_))
-      y <- extractWordsFromString(data.B).map(Setx(_))
-      axb <- IO(x ~* y.members)
-      powerSet <- IO(Setx.powerset(axb).members.filterNot(_.cardinality==0))
-      relations <- IO(powerSet)
-      processedRelations <- Functions.processRelations(relations,x,y)
-      json <-IO(FunctionResponse(processedRelations).asJson)
-      response <- Ok(json)
-    } yield response
+    case req @ POST -> Root / "option0" =>for {
+        data <- req.as[SetsData]
+        x <- extractWordsFromString(data.A).map(Setx(_))
+        y <- extractWordsFromString(data.B).map(Setx(_))
+        axb <- IO(x ~* y.members)
+        powerSet <- IO(Setx.powerset(axb).members.filterNot(_.cardinality==0))
+        relations <- IO(powerSet)
+        processedRelations <- Functions.processRelations(relations,x,y)
+              json <-IO(FunctionResponse(processedRelations).asJson)
+//        json <- Stream.emits(processedRelations).evalMap((x)=>IO(""))
+        response <- Ok(json)
+//        response <- Ok("")
+      } yield response
+
+//      val stream = relations.map(x=>Stream.emits(x).evalMap(x=>IO(x)))
+//      Ok(stream.unsafeRunSync())
 
     case req @ POST -> Root / "option1"=> for {
       data <- req.as[SetsData]
@@ -94,13 +104,12 @@ object FunctionServices {
       domain <-Functions.getDomain(xTuple)
       codomain <-Functions.getCodomain(xTuple)
       isRelation <- IO((domain & codomain)).map(_.cardinality).map(_==0).map(booleanToString)
-//      _<-Logger[IO].info(isRelation)
-//      _<-Logger[IO].info(x.toString)
-//      _<-Logger[IO].info(xTuple.toString)
       data <- IO(booleanTupleToString(Functions.getCartesianProductSubsetInfo(Setx(xTuple),domain,codomain))).map{
         x=> if(isRelation=="No") ("No","No","No","No") else x
       }
-      response <- Ok(FunctionItemResponse(xTuple,isRelation,data._1,data._2,data._3,data._4).asJson)
+      response <- Ok(FunctionResponse(data=FunctionItemResponse(xTuple,isRelation,data._1,data._2,data._3,data._4)
+        ::Nil)
+        .asJson)
     } yield response
 
   }
