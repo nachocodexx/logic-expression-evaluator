@@ -43,8 +43,7 @@ case class Setx[+A](members:List[A]) {
   }
 
   def -[B >: A](ys: Setx[B]): Setx[B] = {
-    if (this.subsetOf(ys) || ys.subsetOf(this)) Setx(members.filterNot(ys.contains))
-    else Setx.empty
+     Setx(members.filterNot(ys.contains))
   }
 
 

@@ -42,6 +42,14 @@ class SetxTest extends  AnyFunSuite{
     assert(true)
   }
 //  X
+  test("Difference A - B"){
+    val A = Setx(1::2::6::7::Nil)
+    val B = Setx(1::2::3::Nil)
+    val result = A-B
+
+    val answer = Setx(6::7::Nil)
+    assert(result == answer)
+  }
   test("Partitions of a set"){
     val A = Setx(1::2::3::Nil)
     assert(true)
