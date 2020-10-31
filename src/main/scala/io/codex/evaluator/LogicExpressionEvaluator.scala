@@ -57,10 +57,14 @@ object LogicExpressionEvaluator {
     val onlyLetterVariables = getVariables(testExpression,isVariable)
 
     val logicalVariablesLength=variables.length
-    val bits = variables.filter(x=>x=='F' || x=='T')
+    val bits = variables.filter(x=>x=='F' || x=='T').map{
+      x=> if(x== 'T') 1 else 0
+    }
 
     val unfilteredBinaryNumbers = generateBinaryNumbers(logicalVariablesLength)
+//    val unfilteredBinaryNumbers = generateBinaryNumbers(logicalVariablesLength)
     val binaryNumbers = filteredBinaryNumbers(bits,unfilteredBinaryNumbers )
+//    val binaryNumbers = filteredBinaryNumbers(bits,unfilteredBinaryNumbers )
 //    val postfixExpression = infixToPostfix(testExpression,'('::Nil)
     val postfixExpression = infixToPostfix(processedTestExpression,'('::Nil)
 

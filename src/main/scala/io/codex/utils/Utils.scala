@@ -62,11 +62,18 @@ object Utils {
     val binaryNumbers  = maximum.toList.map(toBinary(_)).map(pad(_,n))
     binaryNumbers
   }
-  def filteredBinaryNumbers(bits:List[Char], binaryNumbers:List[List[Int]]): List[List[Int]] = {
-    if(bits.length>1) binaryNumbers.filter(filterMixed)
-    else
-      if(onlyTrue(bits)) binaryNumbers.filter(filterLastTrue)
-      else binaryNumbers.filter(filterLastFalse)
+  def filteredBinaryNumbers(bits:List[Int], binaryNumbers:List[List[Int]]): List[List[Int]] = {
+    val bitsLen = bits.length
+    if(bitsLen ==1) binaryNumbers.filter {
+      case xs:+y => y==bits.head
+    }
+    else binaryNumbers.filter {
+      case xs:+x:+y=>x+y  == bits.length
+    }
+//    if(bits.length>1) binaryNumbers.filter(filterMixed)
+//    else
+//      if(onlyTrue(bits)) binaryNumbers.filter(filterLastTrue)
+//      else binaryNumbers.filter(filterLastFalse)
   }
  def filterLastFalse: List[Int]=>Boolean = {
    case init :+x => x==0
