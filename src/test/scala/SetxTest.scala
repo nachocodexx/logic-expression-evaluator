@@ -65,8 +65,8 @@ class SetxTest extends  AnyFunSuite{
     assert(res == Setx.of(3))
   }
   test("Proper subset"){
-    val A = Setx(1::2::Nil)
-    val B = Setx(1::2::3::Nil)
+    val A = Setx(1::2::4::Nil)
+    val B = Setx(1::2::3::4::Nil)
     val res =  A.isProperSubsetOf(B)
     val properSubset = A.getEqualElements(B)
     assert(res)

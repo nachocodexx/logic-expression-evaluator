@@ -1,23 +1,22 @@
 package io.codex.services
 
 import cats.effect._
-import io.codex.encoders.JsonSupport.{Cardinalities, CartersianProduct, Difference, Intersection, PowerSets, ProperSubsets, Subsets, SymmetricDifference}
+import io.codex.encoders.JsonSupport._
 import io.codex.utils.Utils.booleanToString
 import org.http4s._
-import org.http4s.dsl.io._
 import org.http4s.circe._
+import org.http4s.dsl.io._
 //
-import io.circe.syntax._
 import io.circe.generic.auto._
+import io.circe.syntax._
 //
-import io.chrisdavenport.log4cats.{Logger, SelfAwareStructuredLogger}
+import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 //
 import io.codex.decoders.Decoders._
 import io.codex.encoders.JsonSupport.{Members, SetsOperationsResponse}
 import io.codex.sets.Setx
 import io.codex.utils.Utils.extractWordsFromString
-import io.codex.encoders.JsonSupport.SetsOperationsResponse
 
 object SetsServices {
   implicit def usageLogger[F[_]:Sync]: SelfAwareStructuredLogger[F] = Slf4jLogger.unsafeCreate[F]
@@ -33,9 +32,9 @@ object SetsServices {
       cartersianProductBA<-IO(y~*x.members).map(x=>x.map{
         case (x, y) => s"($x,$y)"
       })
-      powerSetA <- IO(Setx.powerset(x.members).members.filter(_.cardinality>0).map(_.members).map(_.mkString(",")).map
+      powerSetA <- IO(Setx.powerset(x.members).members.map(_.members).map(_.mkString(",")).map
       (x=>s"{$x}") )
-      powerSetB <- IO(Setx.powerset(x.members).members.filter(_.cardinality>0).map(_.members).map(_.mkString(",")).map
+      powerSetB <- IO(Setx.powerset(y.members).members.map(_.members).map(_.mkString(",")).map
       (x=>s"{$x}") )
 
       responseJson <- IO(SetsOperationsResponse(
