@@ -67,13 +67,17 @@ class SetxTest extends  AnyFunSuite{
     assert(true)
   }
   test("Symmetric difference: A-&"){
-    val A = Setx(1::2::Nil)
-    val B = Setx(1::2::3::Nil)
+    val A = Setx("A"::"B"::"C"::Nil)
+    val B = Setx("A"::"B"::"C"::"D"::Nil)
     val res = A -& B
+    val res2 = B-&A
+    println(res)
+    println(res2)
+
     assert(res == Setx.of(3))
   }
   test("Proper subset"){
-    val A = Setx(1::2::4::Nil)
+    val A = Setx(1::2::5::Nil)
     val B = Setx(1::2::3::4::Nil)
     val res =  A.isProperSubsetOf(B)
     val properSubset = A.getEqualElements(B)

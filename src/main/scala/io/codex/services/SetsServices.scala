@@ -42,7 +42,7 @@ object SetsServices {
         cardinalities = Cardinalities(x.cardinality,y.cardinality),
         powerSets = PowerSets(powerSetA ,powerSetB),
         comparison = booleanToString(x==y),
-        subsets = Subsets( booleanToString(x.subsetOf(y)),booleanToString(y.subsetOf(y))),
+        subsets = Subsets( booleanToString(x.subsetOf(y)),booleanToString(y.subsetOf(x))),
         difference = Difference((x-y).members,(y-x).members),
         properSubsets = ProperSubsets( booleanToString(x.isProperSubsetOf(y)),booleanToString(y.isProperSubsetOf(x)) ),
         symmetricDifference = SymmetricDifference((x-&y).members,(y-&x).members),

@@ -1,5 +1,7 @@
 package io.codex.services
 
+import cats.implicits._
+import cats.effect.implicits._
 import cats.effect.Sync
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
@@ -39,7 +41,7 @@ object FunctionServices {
         x <- extractWordsFromString(data.A).map(Setx(_))
         y <- extractWordsFromString(data.B).map(Setx(_))
         axb <- IO(x ~* y.members)
-        powerSet <- IO(Setx.powerset(axb).members.filterNot(_.cardinality==0))
+        powerSet <- IO(Setx.powerset(axb).members)
         relations <- IO(powerSet)
         processedRelations <- Functions.processRelations(relations,x,y)
               json <-IO(FunctionResponse(processedRelations).asJson)
@@ -56,7 +58,7 @@ object FunctionServices {
       x <- extractWordsFromString(data.A).map(Setx(_))
       y <- extractWordsFromString(data.B).map(Setx(_))
       axb <- IO(x ~* y.members)
-      powerSet <- IO(Setx.powerset(axb).members.filterNot(_.cardinality==0))
+      powerSet <- IO(Setx.powerset(axb).members)
       relations <- IO(powerSet)
       processedRelations <- Functions.processRelations(relations,x,y).map(_.filter(_.isFunction=="Yes"))
       data <- IO(FunctionResponse(data = processedRelations).asJson)
@@ -68,7 +70,7 @@ object FunctionServices {
       x <- extractWordsFromString(data.A).map(Setx(_))
       y <- extractWordsFromString(data.B).map(Setx(_))
       axb <- IO(x ~* y.members)
-      powerSet <- IO(Setx.powerset(axb).members.filterNot(_.cardinality==0))
+      powerSet <- IO(Setx.powerset(axb).members)
       relations <- IO(powerSet)
       processedRelations <- Functions.processRelations(relations,x,y).map(_.filter(_.isInjective=="Yes"))
       data <- IO(FunctionResponse(data = processedRelations).asJson)
@@ -79,7 +81,7 @@ object FunctionServices {
       x <- extractWordsFromString(data.A).map(Setx(_))
       y <- extractWordsFromString(data.B).map(Setx(_))
       axb <- IO(x ~* y.members)
-      powerSet <- IO(Setx.powerset(axb).members.filterNot(_.cardinality==0))
+      powerSet <- IO(Setx.powerset(axb).members)
       relations <- IO(powerSet)
       processedRelations <- Functions.processRelations(relations,x,y).map(_.filter(_.isSurjective=="Yes"))
       data <- IO(FunctionResponse(data = processedRelations).asJson)
@@ -90,24 +92,47 @@ object FunctionServices {
       x <- extractWordsFromString(data.A).map(Setx(_))
       y <- extractWordsFromString(data.B).map(Setx(_))
       axb <- IO(x ~* y.members)
-      powerSet <- IO(Setx.powerset(axb).members.filterNot(_.cardinality==0))
+      powerSet <- IO(Setx.powerset(axb).members)
       relations <- IO(powerSet)
       processedRelations <- Functions.processRelations(relations,x,y).map(_.filter(_.isBijective=="Yes"))
       data <- IO(FunctionResponse(data = processedRelations).asJson)
       response <- Ok(data)
     } yield response
 
+//    case req @ POST -> Root / "option5" => for {
+//      data <- req.as[OrderedPairData]
+//      x <- extractWordsFromString(data.A)
+//      xTuple <- IO(listToTuple(x)).map(_.map(_.distinct).getOrElse(Nil))
+//      domain <-Functions.getDomain(xTuple)
+//      codomain <-Functions.getCodomain(xTuple)
+//      isRelation <- IO((domain & codomain)).map(_.cardinality).map(_==0).map(booleanToString)
+//      data <- IO(booleanTupleToString(Functions.getCartesianProductSubsetInfo(Setx(xTuple),domain,codomain))).map{
+//        x=> if(isRelation=="No") ("No","No","No","No") else x
+//      }
+//      response <- Ok(FunctionResponse(data=FunctionItemResponse(xTuple,isRelation,data._1,data._2,data._3,data._4)
+//        ::Nil)
+//        .asJson)
+//    } yield response
+
     case req @ POST -> Root / "option5" => for {
-      data <- req.as[OrderedPairData]
-      x <- extractWordsFromString(data.A)
-      xTuple <- IO(listToTuple(x)).map(_.getOrElse(Nil))
-      domain <-Functions.getDomain(xTuple)
-      codomain <-Functions.getCodomain(xTuple)
-      isRelation <- IO((domain & codomain)).map(_.cardinality).map(_==0).map(booleanToString)
-      data <- IO(booleanTupleToString(Functions.getCartesianProductSubsetInfo(Setx(xTuple),domain,codomain))).map{
-        x=> if(isRelation=="No") ("No","No","No","No") else x
-      }
-      response <- Ok(FunctionResponse(data=FunctionItemResponse(xTuple,isRelation,data._1,data._2,data._3,data._4)
+      data <- req.as[FunctionData05]
+      x <- extractWordsFromString(data.A).map(Setx(_))
+      y <- extractWordsFromString(data.B).map(Setx(_))
+      axb <- (x ~* y.members).pure[IO]
+      //      _<-Logger[IO].info(axb.toString)
+      orderedPairStr <- extractWordsFromString(data.orderedPairData)
+      xTuple <- IO(listToTuple(orderedPairStr)).map(_.map(_.distinct).getOrElse(Nil))
+      xTupleSetx <- Setx(xTuple).pure[IO]
+      notRelations <-  (Setx(xTuple)-Setx(axb)).pure[IO]
+      filteredAxB <- (Setx(xTuple)-notRelations).pure[IO]
+      domain <-Functions.getDomain(filteredAxB.members)
+      codomain <-Functions.getCodomain(filteredAxB.members)
+      _<- Logger[IO].info(filteredAxB.toString)
+      data <- booleanTupleToString(Functions.getCartesianProductSubsetInfo(xTupleSetx,domain,codomain)).pure[IO]
+//      ___________________________________________________________________________________________
+      isRelation <- booleanToString(notRelations.cardinality==0).pure[IO]
+      response <- Ok(FunctionResponse(data=FunctionItemResponse(xTuple,isRelation,data._1,data._2,data
+        ._3,data._4)
         ::Nil)
         .asJson)
     } yield response

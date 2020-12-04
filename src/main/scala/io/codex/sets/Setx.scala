@@ -10,7 +10,10 @@ import scala.collection.mutable.ArrayBuffer
 case class Setx[+A](members:List[A]) {
   def contains[B >: A](x: B): Boolean = members.contains(x)
 //  def subsetOf[B >: A](xs: Setx[B]): Boolean = xs.count(members.contains(_)) == members.length
-  def subsetOf[B >: A](xs: Setx[B]): Boolean = (this&xs).members==this.members
+//  def subsetOf[B >: A](xs: Setx[B]): Boolean = (this&xs).members==this.members
+//  {1,2}  {1,2,3}
+//  {1,2} C {1,2,3}    ,   A|B = {1,2,3}  A & B = {1,2}
+  def subsetOf[B >: A](xs: Setx[B]): Boolean = (this&xs).cardinality == this.cardinality
   def getEqualElements[B>:A](ys:Setx[B]): List[B] = ys.members.filter(this.contains(_))
   def isProperSubsetOf[B>:A](ys:Setx[B]): Boolean = this.subsetOf(ys) && (ys-this).cardinality>0
   def count(f: A => Boolean): Int = members.count(f)
